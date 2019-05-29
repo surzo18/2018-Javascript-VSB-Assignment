@@ -1,0 +1,202 @@
+<!-- Binárne hodiny v Javascripte -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        TAMZ
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
+    <style>
+
+       #page1{
+           background-color:rgb(37, 40, 37)!important;
+       }
+    </style>
+</head>
+<body>
+    <div data-role="page" id="page1"> 
+        <div class="ui-content" id="main" role="main">
+            <canvas id="myCanvas" width="400" height="320" style="border: 3px solid #6DFF7D;margin:auto;position: absolute;
+            transform: translate(-50%,-50%); top: 50%;left: 50%;border-radius:3px;">
+                <script>
+
+                    var c = document.getElementById("myCanvas");
+                    var ctx = c.getContext("2d");
+
+                    ctx.fillStyle = '#6DFF7D';
+                    ctx.font = "30px Times New Roman";
+                    ctx.fillText("1", 315, 235);
+                    ctx.fillText("2", 315, 195);
+                    ctx.fillText("4", 315, 155);
+                    ctx.fillText("8", 315, 115);
+                    
+                    ctx.fillText("Hou", 20, 50);
+                    ctx.fillText("Min", 120, 50);
+                    ctx.fillText("Sec", 220, 50);
+
+                    ctx.fillRect(100, 00, 1, 250);
+                    ctx.fillRect(200, 00, 1, 250);
+                    ctx.fillRect(300, 00, 1, 250);
+
+                    function Box(x, y, w, h, fill) {
+                        this.x = x;
+                        this.y = y;
+                        this.w = w;
+                        this.h = h;
+                    }
+
+                    // Seconds boxes
+                    var myBox07 = new Box(260, 95, 20, 20);
+                    var myBox06 = new Box(260, 135, 20, 20);
+                    var myBox05 = new Box(220, 135, 20, 20);
+                    var myBox04 = new Box(260, 175, 20, 20);
+                    var myBox03 = new Box(220, 175, 20, 20);
+                    var myBox02 = new Box(260, 215, 20, 20);
+                    var myBox01 = new Box(220, 215, 20, 20);
+
+                    // Minutes boxes
+                    var myBox17 = new Box(160, 95, 20, 20);
+                    var myBox16 = new Box(160, 135, 20, 20);
+                    var myBox15 = new Box(120, 135, 20, 20);
+                    var myBox14 = new Box(160, 175, 20, 20);
+                    var myBox13 = new Box(120, 175, 20, 20);
+                    var myBox12 = new Box(160, 215, 20, 20);
+                    var myBox11 = new Box(120, 215, 20, 20);
+
+                    // Hours boxes
+                    var myBox27 = new Box(60, 95, 20, 20);
+                    var myBox26 = new Box(60, 135, 20, 20);
+                    var myBox25 = new Box(20, 135, 20, 20);
+                    var myBox24 = new Box(60, 175, 20, 20);
+                    var myBox23 = new Box(20, 175, 20, 20);
+                    var myBox22 = new Box(60, 215, 20, 20);
+                    var myBox21 = new Box(20, 215, 20, 20);
+
+                    gList = [];
+                    gList.push(myBox01);
+                    gList.push(myBox02);
+                    gList.push(myBox03);
+                    gList.push(myBox04);
+                    gList.push(myBox05);
+                    gList.push(myBox06);
+                    gList.push(myBox07);
+
+                    gList.push(myBox11);
+                    gList.push(myBox12);
+                    gList.push(myBox13);
+                    gList.push(myBox14);
+                    gList.push(myBox15);
+                    gList.push(myBox16);
+                    gList.push(myBox17);
+
+                    gList.push(myBox21);
+                    gList.push(myBox22);
+                    gList.push(myBox23);
+                    gList.push(myBox24);
+                    gList.push(myBox25);
+                    gList.push(myBox26);
+                    gList.push(myBox27);
+
+                    function toBin(inInt) {
+                        return parseInt(inInt, 10).toString(2);
+                    }
+
+                    //potrebujeme delku bin cisla 4
+                    //doplneni nul
+                    function binPad(inBin) {
+                        while (inBin.length < 4) {
+                            inBin = "0" + inBin;
+                        }
+                        return inBin
+                    }
+
+                    function drawBin(time, multiple) {
+                        var value_0 = 0;
+                        var value_1 = 0;
+
+                        if (time.length == 2) {
+                            value_0 = time[1];
+                            value_1 = time[0];
+                        } else {
+                            value_0 = time[0];
+                        }
+
+                        var binTime_0 = toBin(value_0);
+                        var binTime_1 = toBin(value_1);
+                        var binPadTime_0 = binPad(binTime_0);
+                        var binPadTime_1 = binPad(binTime_1);
+
+                        for (var i = 0; i < 7; i++) {
+                            var k = i + 7 * multiple;
+                            ctx.fillStyle = "rgb(200, 200, 200)";
+                            var bColor = "#05FF00";
+
+                            if (k % 7 == 1) {
+                                if (binPadTime_0[3] == 1)
+                                    ctx.fillStyle = bColor;
+                            } else if (k % 7 == 0) {
+                                if (binPadTime_1[3] == 1)
+                                    ctx.fillStyle = bColor;
+                            } else if (k % 7 == 2) {
+                                if (binPadTime_1[2] == 1)
+                                    ctx.fillStyle = bColor;
+                            } else if (k % 7 == 3) {
+                                if (binPadTime_0[2] == 1)
+                                    ctx.fillStyle = bColor;
+                            } else if (k % 7 == 4) {
+                                if (binPadTime_1[1] == 1)
+                                    ctx.fillStyle = bColor;
+                            } else if (k % 7 == 5) {
+                                if (binPadTime_0[1] == 1)
+                                    ctx.fillStyle = bColor;
+                            } else if (k % 7 == 6) {
+                                if (binPadTime_0[0] == 1)
+                                    ctx.fillStyle = bColor;
+                            }
+                            ctx.fillRect(gList[k].x, gList[k].y, gList[k].w, gList[k].h);
+
+                        }
+
+                    }
+
+                    function random(){
+                        return String(Math.random() * 100 ) + "%";
+                    }
+
+                    function draw() {
+                        //c.style.top = random();
+                        //c.style.left = random();
+
+
+                        var myDate = new Date();
+                        var mySec = myDate.getSeconds().toString();
+                        var myHours = myDate.getHours().toString();
+                        var myMinutes = myDate.getMinutes().toString();
+
+                        drawBin(mySec, 0);
+                        drawBin(myMinutes, 1);
+                        drawBin(myHours, 2);
+
+                        ctx.fillStyle = '#61FFCD';
+                        ctx.font = "30px Verdana";
+
+                        // clear cas dole
+                        ctx.clearRect(0, 250, 300, 30);
+                        // write cas dole
+                        ctx.fillText(myHours, 25, 280);
+                        ctx.fillText(myMinutes, 130, 280);
+                        ctx.fillText(mySec, 230, 280);
+                    }
+
+                    setInterval(draw, 1000);
+
+                </script>
+        </div><!--content-->
+    </div><!--page-->
+</body>
+</html>

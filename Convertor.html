@@ -1,0 +1,176 @@
+<!-- Money Convertor with Onsen GUI -->
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
+  <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
+  <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
+  <script src="https://unpkg.com/jquery/dist/jquery.min.js"></script>
+ <script > 
+
+var curList = [];
+var urlCNBdefault = "https://homel.vsb.cz/~mor03/TAMZ/cnb_json.php";
+var urlCNB = "https://homel.vsb.cz/~mor03/TAMZ/cnb_json.php";
+var actualCurrency = new Object();
+var inputDate =undefined;
+var lang = "EN";
+document.addEventListener('init', function(event)
+{
+    if (event.target.id === 'page1')
+    {
+        loadCNB();
+        
+        $('#switch').change(function(){
+            if(lang=="EN")
+            {
+                $('#lg').text("CZ");
+                lang="CZ";
+            }
+            else
+            {
+                $('#lg').text("EN");
+                lang="EN";
+            }
+            loadCNB()
+        });
+
+        $('#dateInput').change(function(){
+            inputDate =this.value;
+            loadCNB()
+
+        });
+
+        $("#CZK").keyup(function(){
+            
+            if(jQuery.isEmptyObject(actualCurrency))
+            {
+                $("#curP").text("Nezvolil si menu");
+                return
+            }
+           
+           console.log("CZK " + $("#CZK").val());
+
+            $("#curP").text(actualCurrency.country_label + " " + actualCurrency.rate);
+            //$("#CUR").attr('value', ( actualCurrency.rate * $("#CZK").val()) );
+            $("#CUR").val(  $("#CZK").val() / actualCurrency.rate);
+        });     
+
+        $("#CUR").keyup(function(){
+            if(jQuery.isEmptyObject(actualCurrency))
+            {
+                $("#curP").text("Nezvolil si menu");
+                return
+            }
+
+           console.log("CUR " + $("#CUR").val());
+
+            $("#curP").text(actualCurrency.country_label + " " + actualCurrency.rate);
+            //$("#CZK").attr('value', ( $("#CUR").val() / actualCurrency.rate) );
+            $("#CZK").val( $("#CUR").val() * actualCurrency.rate);
+        });     
+    }
+
+});
+
+function loadCNB()
+{
+    urlCNB = urlCNBdefault;
+    urlCNB += "?lang="+lang.toLowerCase();
+    if(inputDate != undefined)
+    {
+        urlCNB += "&date=" + inputDate;
+    }
+    console.log(urlCNB)
+    $.getJSON( urlCNB, function( json )
+    {
+        curList =[];
+        for(var i = 0; i < json.data.length; i++)
+        {
+           //$("#myP").append(json.data[i].country_label + " - ");
+           //jedna z moznosti je ukladat si meny do listu a z neho pak vytvorit ons-list 
+           //var myCurrency = new Object();
+           //curList.push(myCurrency);
+           var myCurrency = json.data[i];
+           curList.push(myCurrency);
+        }                  
+    });    
+}
+
+function addDialog()
+{
+    document.getElementById('dialog-1').show();
+    $("#onsList").prepend();
+    $("#onsList").empty();
+    for (var i = 0; i < curList.length; i++)
+    {
+        var onsItem= document.createElement('ons-list-item');
+        var todoText = i + ". " + curList[i].country_label + " - "+ curList[i].curr_label + " - " + curList[i].code + " - " + curList[i].rate ;   
+        onsItem.innerHTML = todoText; 
+        onsItem.setAttribute('modifier', "tappable");
+        onsItem.setAttribute('onclick', 'setCountry('+i+')');
+        document.getElementById('onsList').appendChild(onsItem);               
+    }    
+}
+
+function setCountry(id)
+{
+    document.getElementById('dialog-1').hide();
+    $("#push-button1").text(  curList[id].country_label + " " + curList[id].rate);
+    actualCurrency = curList[id];
+    
+}
+
+function closeDialog()
+{
+    document.getElementById('dialog-1').hide();
+}
+</script>  
+  
+</head>
+<body>
+<ons-navigator swipeable id="myNavigator" page="page1.html"></ons-navigator>
+
+<template id="page1.html">
+    <ons-page id="page1">
+        <ons-toolbar>
+            <div class="center">CNB Convertor</div>
+        </ons-toolbar>
+                <p style="text-align: center"> CZK </p>
+                <p style="text-align: center"> <ons-input id="CZK" modifier="underbar material"></ons-input> </p>
+               
+                <p style="text-align: center" id="curP"> CUR
+                <p style="text-align: center"> <ons-input id="CUR" modifier="underbar material"></ons-input> </p>
+                
+                <p style="text-align: center"> <ons-input style="font-size:200%" id="dateInput" type="date" modifier="underbar underbar material"></input> </p>
+                
+                <p style="text-align: center" id="curP"> Select Language</p>
+
+                <p style="text-align: center">
+                    <ons-switch checked stly id="switch"></ons-switch>
+                </p>
+                <p style="text-align: center" id="lg">EN</p>
+
+                <p style="text-align: center">
+                <ons-button modifier="material" id="push-button1" onclick="addDialog();">
+                    Select Currency
+                </ons-button>         
+                </p>
+                <p style="text-align: center" id="myP">
+                </p>
+    </ons-page>   
+</template>
+
+<ons-dialog id="dialog-1">
+
+  <ons-carousel style="width: 100%; height: 400px" swipeable auto-scroll>
+      <ons-carousel-item>
+      <ons-page>
+       <ons-list id="onsList"></ons-list>
+       </ons-page>
+      </ons-carousel-item>
+    </ons-carousel> 
+    
+</ons-dialog>
+
+</body>
+</html>
