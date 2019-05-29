@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">  
+  <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
+  <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
+  <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
+  <script src="https://unpkg.com/jquery/dist/jquery.min.js"></script>
+ <script > 
+
+//TODO 0 - upravit tak aby se misto ukol 1, ukol 2, ukol 3 zobrazoval název úkolu MAM
+//TODO 1 - k nazvu ukolu pridat a ulozit i uzivatelem zvolene datum MAM
+//TODO 2 - doplnit funkci na stisk tlačítka, které odstraní všechny prvky z úložiště MAM
+//TODO 3 - po zvoleni daneho ukolu zobrazit dialog s možností odstranit úkol MAM 
+//TODO 4 - po zvolení odstranit úkol - tento úkol skutečně odstranit z úložiště MAM
+//TODO 5 - vytvorit objekt ukol a do uloziste ukladat a nacitat tento objekt pomoci JSON 
+
+document.addEventListener('init', function(event)
+{
+    showTodo();    
+});
+
+function addTask()
+{
+    var myDate = reformatDate(document.getElementById('dateTime').value);
+
+    //vytvori klic pro ukladani zaznamu do local storage
+    //klic muzete vytvorit i vlastni/jiny
+    var myKey = new Date;
+    myKey   = myKey.getTime();
+    //zaznam, ktery bude ulozen pod klicem
+    if($("#taskName").val() === ""){
+         ons.notification.alert("Zadaj niečo"); 
+        return;
+    }
+    else{
+        var ukol = new Object();
+        ukol.todoText = $("#taskName").val()
+        ukol.todoDate = myDate;
+        ukol.Note = $("#taskNote").val();
+        ukol.Priority = document.querySelector('input[name="priority"]:checked').value; 
+        ukol.Vibration = document.getElementById('switch-1');
+        ukol.Vibration = ukol.Vibration.checked;
+        ukol.Volume = $("#alertVolume").val()
+        
+        var myJSON = JSON.stringify(ukol);
+    }
+
+    //localStorage[myKey] = todoText;
+    localStorage.setItem(myKey,myJSON); 
+    
+    showTodo();
+}
+
+function removeAll()
+{
+    
+    //$("#todoList").empty();
+    localStorage.clear();
+    ons.notification.alert("Remove All Items"); 
+    showTodo();
+    
+}
+
+function itemClick(id)
+{
+    document.getElementById('dialog-2').show();
+    obj = JSON.parse(localStorage[id]);
+    document.getElementById("SelectedTask").innerHTML = obj.todoText;
+    document.getElementById('push-button6').setAttribute('onclick', "removeTask("+id+")"); 
+
+
+    //ons.notification.alert("item key: " + id);       
+      
+}
+
+function removeTask(id){
+    console.log(id);
+    localStorage.removeItem(id);
+    showTodo();
+    closeDialog();
+}
+
+function showTodo()
+{
+    $("#todoList").empty();
+    for (var i = 0; i < localStorage.length; i++)
+    {
+        var onsItem= document.createElement('ons-list-item');
+        //ziskam klic pro pristup k zaznamu
+        var myKey = localStorage.key(i);
+          
+        onsItem.setAttribute('onclick', "itemClick("+myKey+")"); 
+        obj = JSON.parse(localStorage[myKey]);
+        onsItem.innerHTML =obj.todoText + " : " + obj.todoDate; 
+        onsItem.setAttribute('modifier','expandable');
+        document.getElementById('todoList').appendChild(onsItem);               
+    }
+}
+
+function addDialog()
+{
+    document.getElementById('dateTime').valueAsDate = new Date();
+    document.getElementById('dialog-1').show();
+}
+
+function closeDialog()
+{
+    document.getElementById('dialog-1').hide();
+    document.getElementById('dialog-2').hide();
+
+}
+
+function reformatDate(dateStr)
+{
+  dArr = dateStr.split("-");  // ex input "2010-01-18"
+  return dArr[2]+ "-" +dArr[1]+ "-" +dArr[0]; 
+}
+
+
+</script>  
+  
+</head>
+<body>
+<ons-navigator swipeable id="myNavigator" page="page1.html"></ons-navigator>
+
+<template id="page1.html">
+    <ons-page id="page1">
+        <ons-toolbar>
+            <div class="center">Local Storage</div>
+        </ons-toolbar>
+
+        <p>TODO List</p>
+
+        <ons-list id="todoList">
+        </ons-list>
+            <ons-button modifier="material" id="push-button2" onclick="addDialog();">Add Task Using Dialog</ons-button>
+            <ons-button modifier="material" id="push-button3" onclick="removeAll();">Remove All Task</ons-button>
+    
+        </ons-list-item>
+    </ons-page>
+</template>
+
+<ons-dialog id="dialog-1">
+
+    <div style="text-align: center; padding: 10px;">
+
+    <p>
+      <ons-input id="taskName" modifier="underbar" placeholder="Task Name" float></ons-input>
+    </p>  
+    <p>
+      <input type="date" style="height:30px;width: 90%; font-size:200%;" id="dateTime" float >
+    </p>       
+    <textarea id="taskNote" class="textarea" rows="3" placeholder="Notes"></textarea>
+    <ons-list style="margin-top:10px;">
+        <li class="list-header">
+            Task Priority
+        </li>
+        <ons-list-item tappable>
+            <label class="left">
+                <ons-radio modifier="material" name="priority" input-id="radio_1" value="High" ></ons-radio>
+            </label>
+            <label for="radio_1" class="center" style="color:red;">
+                High
+            </label>
+        </ons-list-item>
+        <ons-list-item tappable>
+        <label class="left">
+          <ons-radio modifier="material" name="priority" input-id="radio_2" value="Medium" checked></ons-radio>
+        </label>
+        <label for="radio_2" class="center" >
+         Medium
+        </label>
+      </ons-list-item>
+
+         <ons-list-item tappable>
+        <label class="left">
+          <ons-radio modifier="material" name="priority" input-id="radio_3" value="Low"></ons-radio>
+        </label>
+        <label for="radio_3" class="center" style="color:blue;">
+        Low
+        </label>
+      </ons-list-item>
+    </ons-list>
+    
+    <ons-list style="margin-top:10px;">
+        <li class="list-header">
+            Notifications
+        </li>
+        <ons-list-item tappable>
+    
+         <span style="margin-right: 50px;">Enable vibration</span>   
+         <ons-switch checked id="switch-1"></ons-switch>
+     
+        </ons-list-item>
+    <ons-list-item tappable>
+        Alert Volume
+        <ons-range modifier="material" id="alertVolume" style="width: 100%;" value="75" min="0" max="100" step="5"></ons-range> 
+    </ons-list-item> 
+
+    </ons-list>
+
+    <p><ons-button modifier="material" id="push-button4" onclick="addTask();">Add Task</ons-button></p> 
+    <p><ons-button modifier="material" id="push-button5" onclick="closeDialog();">Close</ons-button></p>       
+    </div>
+    
+</ons-dialog>
+
+
+<ons-dialog id="dialog-2">
+
+    <div style="text-align: center; padding: 10px;">
+
+    <p id="SelectedTask">
+      
+    </p>  
+   
+    <p><ons-button modifier="material" id="push-button6" onclick="removeTask(this.id);">Remove</ons-button></p> 
+    <p><ons-button modifier="material" id="push-button7" onclick="closeDialog();">Close</ons-button></p>       
+    </div>
+    
+</ons-dialog>
+</body>
+</html>
+
